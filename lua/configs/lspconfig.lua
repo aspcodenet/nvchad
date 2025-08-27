@@ -26,3 +26,16 @@ end
 
 
 -- read :h vim.lsp.config for changing options of lsp servers 
+
+
+-- In your custom init.lua
+local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.go",
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+  end,
+  group = format_sync_grp,
+})
+
+
