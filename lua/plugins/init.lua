@@ -13,6 +13,30 @@ return {
     end,
   },
 
+  -- Debugging for Go (nvim-dap + dap-ui + dap-go)
+  {
+    "mfussenegger/nvim-dap",
+    lazy = false,
+  },
+  {
+    "nvim-neotest/nvim-nio",
+    lazy = false,
+  },
+  {
+    "rcarriga/nvim-dap-ui",
+    lazy = false,
+    config = function()
+      require("dapui").setup()
+    end,
+  },
+  {
+    "leoluz/nvim-dap-go",
+    lazy = false,
+    config = function()
+      require("configs.dap")
+    end,
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 
