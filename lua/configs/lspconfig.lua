@@ -2,7 +2,17 @@ require("nvchad.configs.lspconfig").defaults()
 
 
 local servers = {
-  html = {},
+  html = {
+    filetypes = { "html", "css", "scss", "less", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+    init_options = {
+        html = {
+          -- This ensures Emmet works for JSX and TSX files
+          options = {
+            useBem = false,
+          },
+        },
+      },
+  },
   gopls = {
     filetypes = { "go", "gomod", "gowork", "gotmpl" },	
     cmd = {"gopls"},
