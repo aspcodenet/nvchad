@@ -26,6 +26,15 @@ local servers = {
       },
     },
   },
+  -- Add this block for intelephense
+  intelephense = {
+    filetypes = { "php" },
+    init_options = {
+      global_symbol_namespaces = true,
+      -- Optional settings, customize as needed
+      -- e.g., to configure code formatting or validation
+    },
+  },  
 }
 
 for name, opts in pairs(servers) do
