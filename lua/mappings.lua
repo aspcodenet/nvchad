@@ -1,6 +1,7 @@
 require "nvchad.mappings"
 
 -- add yours here
+local my_f5functions = require("configs/my_f5functions")
 
 local map = vim.keymap.set
 
@@ -13,18 +14,38 @@ map("i", "jk", "<ESC>")
 local ok_dap, dap = pcall(require, "dap")
 local ok_dapui, dapui = pcall(require, "dapui")
 -- Visual Studio-like keybindings
+
 map("n", "<F5>", function()
-	if ok_dap then
-		local ft = vim.bo.filetype or ""
-		local configs = (dap.configurations and dap.configurations[ft]) or nil
-		if configs and #configs > 0 then
-			-- vim.cmd("enew")
-			dap.continue()
-		else
-			vim.notify("No DAP configurations found for '" .. ft .. "'. Add one to `dap.configurations[<filetype>]` or configure an adapter.", vim.log.levels.ERROR)
-		end
-	end
-end, { desc = "DAP: Start/Continue (F5)" })
+  local ft = vim.bo.filetype or ""
+  if ft == "go" then
+    if ok_dap then
+      local ok, dapgo = pcall(require, "dap-go")
+      if ok then
+        vim.cmd("enew")
+        dapgo.debug_test()
+      else
+        vim.notify("dap-go not found. Is it installed and configured?", vim.log.levels.ERROR)
+      end
+    end
+  elseif ft == "html" or ft == "css" or ft == "javascript" or ft == "typescript" or ft == "javacriptreact" or ft == "typescriptreact" then
+    -- Call the dedicated function for live-server
+    my_f5functions.start_live_server()
+  elseif ft == "php" then
+    -- Call the dedicated function for PHP server
+    my_f5functions.start_php_server()
+  else
+    -- Your default DAP logic for other file types
+    if ok_dap then
+      local configs = (dap.configurations and dap.configurations[ft]) or nil
+      if configs and #configs > 0 then
+        dap.continue()
+      else
+        vim.notify("No DAP configurations found for '" .. ft .. "'. Add one to `dap.configurations[<filetype>]` or configure an adapter.", vim.log.levels.ERROR)
+      end
+    end
+  end
+end, { desc = "Run/Debug based on file type" })
+
 map("n", "<S-F5>", function() if ok_dap then dap.terminate() end end, { desc = "DAP: Stop/Terminate (Shift+F5)" })
 map("n", "<C-F5>", function()
 	if ok_dap then
@@ -77,104 +98,5 @@ map("n", "<leader>dG", function()
 	end
 end, { desc = "DAP-Go: Debug test" })
 
-
-map("n","<leader>ts", function()
-		-- prefer serving from the current buffer directory so requests match files you edit
-		local buf_dir = vim.fn.expand("%:p:h")
-		local project_root = vim.fn.getcwd()
-		local local_bin_project = project_root .. "/node_modules/.bin/live-server"
-		local local_bin_buf = buf_dir .. "/node_modules/.bin/live-server"
-
-		local function start_server(exec, dir)
-			local cmd = exec .. " --port=8080"
-			-- open a new empty buffer and start a terminal in it so live-server runs in its own buffer
-			vim.cmd("enew")
-			-- use termopen so we can set cwd reliably across shells
-			vim.fn.termopen(cmd, { cwd = dir })
-			vim.cmd("startinsert")
-		end
-
-		-- check local installs: prefer project-level, then buffer-local
-		if vim.loop.fs_stat(local_bin_project) then
-			start_server(local_bin_project, project_root)
-			return
-		end
-		if vim.loop.fs_stat(local_bin_buf) then
-			start_server(local_bin_buf, buf_dir)
-			return
-		end
-
-		if vim.fn.executable("live-server") == 1 then
-			start_server("live-server", buf_dir)
-			return
-		end
-
-		-- Not installed: decide between installing in project (if package.json exists) or global
-		local install_cmd = { "npm" }
-		if vim.fn.filereadable(project_root .. "/package.json") == 1 then
-			table.insert(install_cmd, "install")
-			table.insert(install_cmd, "--save-dev")
-			table.insert(install_cmd, "live-server")
-		else
-			table.insert(install_cmd, "install")
-			table.insert(install_cmd, "-g")
-			table.insert(install_cmd, "live-server")
-		end
-
-		vim.notify("live-server not found, running npm install...", vim.log.levels.INFO)
-
-		vim.fn.jobstart(install_cmd, {
-			cwd = project_root,
-			on_exit = function(_, code)
-				vim.schedule(function()
-					if code == 0 then
-						vim.notify("live-server installed successfully — starting server", vim.log.levels.INFO)
-						if vim.loop.fs_stat(local_bin_project) then
-							start_server(local_bin_project, project_root)
-						elseif vim.loop.fs_stat(local_bin_buf) then
-							start_server(local_bin_buf, buf_dir)
-						elseif vim.fn.executable("live-server") == 1 then
-							start_server("live-server", buf_dir)
-						else
-							vim.notify("Installed but executable not found in PATH", vim.log.levels.ERROR)
-						end
-					else
-						vim.notify("live-server installation failed (exit code: " .. tostring(code) .. ")", vim.log.levels.ERROR)
-					end
-				end)
-			end,
-		})
-end, {desc = "Start live server"})
-
--- Start live-server in a new tab
-map("n","<leader>tt", function()
-	local buf_dir = vim.fn.expand("%:p:h")
-	local project_root = vim.fn.getcwd()
-	local local_bin_project = project_root .. "/node_modules/.bin/live-server"
-	local local_bin_buf = buf_dir .. "/node_modules/.bin/live-server"
-
-	local function start_server_in_tab(exec, dir)
-		local cmd = exec .. " --port=8080"
-		-- open a new buffer for the terminal (not a tab)
-		vim.cmd("enew")
-		vim.fn.termopen(cmd, { cwd = dir })
-		vim.cmd("startinsert")
-	end
-
-	if vim.loop.fs_stat(local_bin_project) then
-		start_server_in_tab(local_bin_project, project_root)
-		return
-	end
-	if vim.loop.fs_stat(local_bin_buf) then
-		start_server_in_tab(local_bin_buf, buf_dir)
-		return
-	end
-	if vim.fn.executable("live-server") == 1 then
-		start_server_in_tab("live-server", buf_dir)
-		return
-	end
-
-	vim.notify("live-server not found. Use <leader>ts to install and start.", vim.log.levels.WARN)
-end, {desc = "Start live server in tab"})
 
 
