@@ -99,9 +99,7 @@ map("n", "<leader>dG", function()
 end, { desc = "DAP-Go: Debug test" })
 
 
-map("i", "<C-l>", function()
-  vim.fn.feedkeys(vim.fn['copilot#Accept'](), '')
-end, { desc = "Copilot Accept" })
-
-
-vim.api.nvim_set_keymap('i', '<leader>c', '<Plug>(copilot-suggest)', { silent = true })
+map("i", "<C-l>", "<cmd>:Copilot suggestion<CR>", {
+  desc = "Copilot Suggest",
+  silent = true
+})

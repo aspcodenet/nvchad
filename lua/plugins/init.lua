@@ -58,6 +58,8 @@ return {
       require("copilot").setup({
         -- This disables the visual suggestions, as copilot-cmp will handle them
         suggestion = { enabled = false },
+        throttle_ms = 1500, 
+        debounce=75,
         panel = { enabled = false },
       })
     end,
@@ -70,46 +72,65 @@ return {
       require("copilot_cmp").setup()
     end,
   },
-  {
-      "hrsh7th/nvim-cmp",
-      event = "InsertEnter",
-      config = function()
+-- In your plugins.lua file or a similar config location
+
+{
+    "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
+    config = function()
         local cmp = require("cmp")
         local luasnip = require("luasnip") -- 
         cmp.setup({
-          sources = cmp.config.sources({
-            -- Add this line to include Copilot as a source
-            { name = "copilot" },
-            { name = "nvim_lsp" },
-            { name = "luasnip" },
-            { name = "buffer" },
-          }),
-mapping = cmp.mapping.preset.insert({
-        -- `<C-n>` and `<C-p>` are for navigating the list
-        ["<C-n>"] = cmp.mapping.select_next_item(),
-        ["<C-p>"] = cmp.mapping.select_prev_item(),
+            sources = cmp.config.sources({
+                -- Add this line to include Copilot as a source
+                { name = "copilot" },
+                { name = "nvim_lsp" },
+                { name = "luasnip" },
+                { name = "buffer" },
+            }),
+            window = {
+                completion = {
+                    -- side = "right",
+                    col_offset = 8,
+                    -- side_padding = 10
+                }
+            },
+            mapping = cmp.mapping.preset.insert({
+                -- `<C-n>` and `<C-p>` are for navigating the list
+                ["<C-n>"] = cmp.mapping.select_next_item(),
+                ["<C-p>"] = cmp.mapping.select_prev_item(),
 
-        -- The intelligent Tab key
-        ["<Enter>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            -- When the menu is visible, accept the current selection
-            cmp.confirm({ select = true })
-          elseif luasnip.expandable() then
-            -- If a snippet is expandable, expand it
-            luasnip.expand()
-          elseif luasnip.jumpable(1) then
-            -- If you're inside a snippet, jump to the next placeholder
-            luasnip.jump(1)
-          else
-            -- If nothing is happening, insert a tab character
-            fallback()
-          end
-        end, { "i", "s" }),
-      }),
-    })
-      end,
+                -- The intelligent Tab key
+                ["<Tab>"] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                        -- When the menu is visible, accept the current selection
+                        cmp.confirm({ select = true })
+                    elseif luasnip.expandable() then
+                        -- If a snippet is expandable, expand it
+                        luasnip.expand()
+                    elseif luasnip.jumpable(1) then
+                        -- If you're inside a snippet, jump to the next placeholder
+                        luasnip.jump(1)
+                    else
+                        -- If nothing is happening, insert a tab character
+                        fallback()
+                    end
+                end, { "i", "s" }),
+            }),
+        })
+    end,
+},
+-- {
+--   "L3MON4D3/LuaSnip",
+--   -- Add friendly-snippets as a dependency
+--   dependencies = { "rafamadriz/friendly-snippets" },
+--   event = "InsertEnter",
+--   config = function()
+--     require("luasnip.loaders.from_vscode").lazy_load()
+--   end,
+-- },
 
-    },
+
 
   -- {
   --   "hrsh7th/nvim-cmp",
