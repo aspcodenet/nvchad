@@ -60,7 +60,7 @@ return {
         suggestion = { enabled = false },
         throttle_ms = 1500, 
         debounce=75,
-        panel = { enabled = false },
+        panel = { enabled = true },
       })
     end,
   },
@@ -90,9 +90,9 @@ return {
             }),
             window = {
                 completion = {
-                    -- side = "right",
-                    col_offset = 8,
-                    -- side_padding = 10
+                  border = "rounded",
+                  col_offset = 8,
+                  --side_padding = 10
                 }
             },
             mapping = cmp.mapping.preset.insert({
