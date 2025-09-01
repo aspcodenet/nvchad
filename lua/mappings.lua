@@ -103,3 +103,28 @@ map("i", "<C-l>", "<cmd>:Copilot suggestion<CR>", {
   desc = "Copilot Suggest",
   silent = true
 })
+
+
+
+-- Mappings for opencode.nvim
+-- Use 'v' for visual mode to apply to a selection
+map("v", "<leader>oa", function() require("opencode").ask("@selection: ") end, { desc = "Ask OpenCode about visual selection" })
+
+-- Use 'n' for normal mode to apply to the cursor position oa
+map("n", "<leader>oa", function() require("opencode").ask("@cursor: ") end, { desc = "Ask OpenCode about code at cursor" })
+
+-- Toggle the OpenCode TUI in a split window
+map("n", "<leader>ot", function() require("opencode").toggle() end, { desc = "Toggle OpenCode TUI" })
+
+
+-- map("n", "<leader>cc", "<cmd>CopilotChat<CR>", { desc = "Copilot Chat" })
+
+-- -- Ask Copilot to fix the code in the current buffer
+-- map("n", "<leader>cf", "<cmd>CopilotChatFix<CR>", { desc = "Fix code" })
+
+-- -- Explain the code under the cursor
+-- map("n", "<leader>ce", "<cmd>CopilotChatExplain<CR>", { desc = "Explain code" })
+
+-- -- Add more keymaps for common commands
+-- -- For example, to generate tests:
+-- map("v", "<leader>ct", ":CopilotChatGenerateTests<CR>", { desc = "Generate tests" })
