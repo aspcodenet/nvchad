@@ -34,7 +34,15 @@ local servers = {
       -- Optional settings, customize as needed
       -- e.g., to configure code formatting or validation
     },
-  },  
+  },
+    -- Add this block for clangd
+  clangd = {
+    filetypes = { "c", "cpp", "h", "hpp" },
+    cmd = {
+      "clangd",
+      "--query-driver=" .. "C:\\msys64\\ucrt64\\bin\\gcc.exe,C:\\msys64\\ucrt64\\bin\\g++.exe",
+    },
+  },
 }
 
 for name, opts in pairs(servers) do
