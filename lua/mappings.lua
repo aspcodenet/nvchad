@@ -2,6 +2,7 @@ require "nvchad.mappings"
 
 -- add yours here
 local my_f5functions = require("configs/my_f5functions")
+require("configs/dap")
 
 local map = vim.keymap.set
 
@@ -21,8 +22,7 @@ map("n", "<F5>", function()
     if ok_dap then
       local ok, dapgo = pcall(require, "dap-go")
       if ok then
-        vim.cmd("enew")
-        dapgo.debug_test()
+        dap.continue()
       else
         vim.notify("dap-go not found. Is it installed and configured?", vim.log.levels.ERROR)
       end
