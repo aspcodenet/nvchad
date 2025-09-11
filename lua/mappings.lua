@@ -18,6 +18,7 @@ local ok_dapui, dapui = pcall(require, "dapui")
 
 map("n", "<F5>", function()
   local ft = vim.bo.filetype or ""
+  vim.notify("Running F5 for filetype: " .. ft)
   if ft == "go" then
     if ok_dap then
       local ok, dapgo = pcall(require, "dap-go")
@@ -30,6 +31,14 @@ map("n", "<F5>", function()
   elseif ft == "html" or ft == "css" or ft == "javascript" or ft == "typescript" or ft == "javacriptreact" or ft == "typescriptreact" then
     -- Call the dedicated function for live-server
     my_f5functions.start_live_server()
+  elseif ft=="c" or ft=="cpp" then
+    -- Call the dedicated function for C/C++ server
+    local configs = (dap.configurations and dap.configurations[ft]) or nil
+    if configs and #configs > 0 then
+      dap.continue()
+    else
+      vim.notify("No DAP configuration for '" .. ft .. "'. Add one to `dap.configurations[<filetype>]` or configure an adapter.", vim.log.levels.ERROR)
+    end
   elseif ft == "php" then
     -- Call the dedicated function for PHP server
     my_f5functions.start_php_server()
